@@ -1,0 +1,14 @@
+FROM alpine:latest as builder
+
+RUN apk add git make cmake libstdc++ gcc g++ libuv-dev openssl-dev hwloc-dev
+COPY . .
+RUN mkdir build && cd build && cmake .. && make -j$(nproc)
+
+FROM alpine:latest
+
+RUN apk add libuv-dev openssl-dev hwloc-dev
+RUN mkdir /app
+COPY --from=builder ./build/xmrig /app
+
+WORKDIR /app
+ENTRYPOINT ["/app/xmrig"]
